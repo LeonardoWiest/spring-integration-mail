@@ -1,4 +1,4 @@
-# spring-integration-mail
+# Spring Integration Mail
 
 This directory demontrier how to work with mail messages in Spring Integration.
 
