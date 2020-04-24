@@ -9,3 +9,6 @@ This directory demontrier how to work with mail messages in Spring Integration.
 References: <br>
 https://docs.spring.io/spring-integration/reference/html/mail.html <br>
 https://github.com/spring-projects/spring-integration-samples
+
+Obs:
+https://support.google.com/accounts/answer/6010255?hl=en
