@@ -5,16 +5,27 @@ import java.util.Properties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.IntegrationFlows;
+import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.integration.mail.ImapMailReceiver;
 import org.springframework.integration.mail.dsl.ImapMailInboundChannelAdapterSpec;
 import org.springframework.integration.mail.dsl.Mail;
+import org.springframework.stereotype.Component;
 
+import com.github.leonardowiest.config.SearchStrategy;
+
+/**
+ * 
+ * @author Leonardo Wiest
+ *
+ */
+@Component
 public class MailReceivingAdapter {
 
 	@Bean
 	public IntegrationFlow mailReadFlow() {
 
-		return IntegrationFlows.from(getInboundChannelAdapterConfig());
+		return IntegrationFlows.from(getInboundChannelAdapterConfig()).handle("meuBean", "handleRecebimento")
+				.channel(MessageChannels.queue("handleRecebimento")).get();
 	}
 
 	private ImapMailInboundChannelAdapterSpec getInboundChannelAdapterConfig() {
@@ -22,7 +33,8 @@ public class MailReceivingAdapter {
 		ImapMailReceiver receiver = new ImapMailReceiver(getStoreURI());
 		receiver.setJavaMailProperties(getProperties());
 		receiver.setShouldDeleteMessages(false);
-		receiver.setShouldMarkMessagesAsRead(false);
+		receiver.setShouldMarkMessagesAsRead(true);
+		receiver.setSearchTermStrategy(new SearchStrategy());
 
 		return Mail.imapInboundAdapter(receiver);
 	}
