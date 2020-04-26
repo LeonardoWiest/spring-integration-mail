@@ -2,7 +2,8 @@ package com.github.leonardowiest.service;
 
 import javax.mail.internet.MimeMessage;
 
-import org.springframework.integration.annotation.ServiceActivator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /**
@@ -10,12 +11,13 @@ import org.springframework.stereotype.Service;
  * @author Leonardo Wiest
  *
  */
-@Service(value = "meuBean")
+@Service(value = "mailReceiving")
 public class MailReceivingService {
 
-	@ServiceActivator(inputChannel = "handleRecebimento")
-	public void handleRecebimento(MimeMessage message) {
+	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-		System.out.println("entrou...");
+	public void handle(MimeMessage message) {
+
+		logger.info("Entrou...");
 	}
 }

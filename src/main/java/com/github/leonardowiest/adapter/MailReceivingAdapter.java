@@ -2,10 +2,12 @@ package com.github.leonardowiest.adapter;
 
 import java.util.Properties;
 
+import javax.mail.Authenticator;
+import javax.mail.PasswordAuthentication;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.IntegrationFlows;
-import org.springframework.integration.dsl.MessageChannels;
 import org.springframework.integration.mail.ImapMailReceiver;
 import org.springframework.integration.mail.dsl.ImapMailInboundChannelAdapterSpec;
 import org.springframework.integration.mail.dsl.Mail;
@@ -24,16 +26,25 @@ public class MailReceivingAdapter {
 	@Bean
 	public IntegrationFlow mailReadFlow() {
 
-		return IntegrationFlows.from(getInboundChannelAdapterConfig()).handle("meuBean", "handleRecebimento")
-				.channel(MessageChannels.queue("handleRecebimento")).get();
+		return IntegrationFlows.from(getInboundChannelAdapterConfig()).handle("mailReceiving", "handle").get();
 	}
 
 	private ImapMailInboundChannelAdapterSpec getInboundChannelAdapterConfig() {
 
-		ImapMailReceiver receiver = new ImapMailReceiver(getStoreURI());
+		ImapMailReceiver receiver = new ImapMailReceiver();
 		receiver.setJavaMailProperties(getProperties());
+		
+		receiver.setJavaMailAuthenticator(new Authenticator() {
+			
+			@Override
+			protected PasswordAuthentication getPasswordAuthentication() {
+			
+				return new PasswordAuthentication("testesspringjava@gmail.com", "testes123456789");
+			}
+		});
+		
 		receiver.setShouldDeleteMessages(false);
-		receiver.setShouldMarkMessagesAsRead(true);
+		receiver.setShouldMarkMessagesAsRead(false);
 		receiver.setSearchTermStrategy(new SearchStrategy());
 
 		return Mail.imapInboundAdapter(receiver);
@@ -50,9 +61,11 @@ public class MailReceivingAdapter {
 	 * 
 	 * @return
 	 */
-	private String getStoreURI() {
-		return "imaps://mail:password@imap.gmail.com/INBOX";
-	}
+	/*
+	 * private String getStoreURI() { return
+	 * "imaps://testesspringjava%40gmail.com:testes123456789@imap.gmail.com/INBOX";
+	 * }
+	 */
 
 	private Properties getProperties() {
 
