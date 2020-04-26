@@ -2,15 +2,14 @@ package com.github.leonardowiest.adapter;
 
 import java.util.Properties;
 
-import javax.mail.Authenticator;
-import javax.mail.PasswordAuthentication;
-
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.integration.dsl.IntegrationFlow;
+import org.springframework.integration.dsl.IntegrationFlowBuilder;
 import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.mail.ImapMailReceiver;
-import org.springframework.integration.mail.dsl.ImapMailInboundChannelAdapterSpec;
 import org.springframework.integration.mail.dsl.Mail;
+import org.springframework.integration.mail.dsl.MailInboundChannelAdapterSpec;
 import org.springframework.stereotype.Component;
 
 import com.github.leonardowiest.config.SearchStrategy;
@@ -23,49 +22,73 @@ import com.github.leonardowiest.config.SearchStrategy;
 @Component
 public class MailReceivingAdapter {
 
+	@Value("${mail.protocol}")
+	private String protocol;
+
+	@Value("${mail.username}")
+	private String username;
+
+	@Value("${mail.password}")
+	private String password;
+
 	@Bean
 	public IntegrationFlow mailReadFlow() {
 
-		return IntegrationFlows.from(getInboundChannelAdapterConfig()).handle("mailReceiving", "handle").get();
+		return getFlowBuilder().get();
+
+		// IntegrationFlows.from(getInboundChannelAdapterConfig()).handle("mailReceiving",
+		// "handle").get();
 	}
 
-	private ImapMailInboundChannelAdapterSpec getInboundChannelAdapterConfig() {
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private IntegrationFlowBuilder getFlowBuilder() {
 
-		ImapMailReceiver receiver = new ImapMailReceiver();
-		receiver.setJavaMailProperties(getProperties());
-		
-		receiver.setJavaMailAuthenticator(new Authenticator() {
-			
-			@Override
-			protected PasswordAuthentication getPasswordAuthentication() {
-			
-				return new PasswordAuthentication("testesspringjava@gmail.com", "testes123456789");
-			}
-		});
-		
+		IntegrationFlowBuilder flowBuilder;
+
+		MailInboundChannelAdapterSpec adapterSpec;
+
+		switch (protocol.toUpperCase()) {
+		case "IMAP":
+		case "IMAPS":
+			adapterSpec = getImapFlowBuilder();
+			break;
+		case "POP3":
+		case "POP3S":
+		default:
+
+			throw new IllegalArgumentException(
+					String.format("Protocolo de correio informado não suportado: %s", protocol));
+		}
+
+		flowBuilder = IntegrationFlows.from(adapterSpec);
+
+		return flowBuilder;
+	}
+
+	@SuppressWarnings("rawtypes")
+	private MailInboundChannelAdapterSpec getImapFlowBuilder() {
+
+		ImapMailReceiver receiver = new ImapMailReceiver(getStoreURI());
+
+		receiver.setShouldMarkMessagesAsRead(true);
 		receiver.setShouldDeleteMessages(false);
-		receiver.setShouldMarkMessagesAsRead(false);
+		receiver.setJavaMailProperties(getProperties());
 		receiver.setSearchTermStrategy(new SearchStrategy());
 
 		return Mail.imapInboundAdapter(receiver);
 	}
 
-	/**
-	 * 
-	 * No lugar de 'mail' vai o e-mail. Substituir '@' por '%40'.
-	 * 
-	 * Exemplos:
-	 * 
-	 * mail: jose123%40gmail.com <br>
-	 * password: 123456
-	 * 
-	 * @return
-	 */
-	/*
-	 * private String getStoreURI() { return
-	 * "imaps://testesspringjava%40gmail.com:testes123456789@imap.gmail.com/INBOX";
-	 * }
-	 */
+	private String getStoreURI() {
+
+		String sanitizedUsername = sanitizeUsername();
+
+		return String.format("imaps://%s:%s@imap.gmail.com/INBOX", sanitizedUsername, password);
+	}
+
+	private String sanitizeUsername() {
+
+		return username.replace("@", "%40");
+	}
 
 	private Properties getProperties() {
 
