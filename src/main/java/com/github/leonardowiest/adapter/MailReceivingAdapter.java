@@ -34,10 +34,7 @@ public class MailReceivingAdapter {
 	@Bean
 	public IntegrationFlow mailReadFlow() {
 
-		return getFlowBuilder().get();
-
-		// IntegrationFlows.from(getInboundChannelAdapterConfig()).handle("mailReceiving",
-		// "handle").get();
+		return getFlowBuilder().handle("mailReceiving", "handle").get();
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
