@@ -31,7 +31,7 @@ public class MailProperties {
 
 		Properties prop = new Properties();
 
-		switch (getProtocol()) {
+		switch (getProtocol().toUpperCase()) {
 		case "IMAP":
 			prop.setProperty("mail.imap.socketFactory.class", "javax.net.SocketFactory");
 			prop.setProperty("mail.imap.socketFactory.fallback", "false");
