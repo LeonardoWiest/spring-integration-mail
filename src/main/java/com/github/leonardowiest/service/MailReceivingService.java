@@ -27,6 +27,8 @@ public class MailReceivingService {
 
 	public void handle(MimeMessage message) throws MessagingException, IOException {
 
+		logger.info("MailReceivingService::handle method...");
+
 		Folder folder = message.getFolder();
 
 		folder.open(Folder.READ_ONLY);
