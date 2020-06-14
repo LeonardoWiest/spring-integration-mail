@@ -1,6 +1,6 @@
 # Spring Integration Mail
 
-Esse é um repositório baseado na feature "Email" do Spring Integration e nele apresento como trabalhar com mensagens de correio utilizando essa tecnologia.
+Esse é um repositório baseado na feature "Email" do Spring Integration e nele apresento como trabalhar com mensagens de correio utilizando essa tecnologia do Sprint.
 
 Referências: <br>
 https://docs.spring.io/spring-integration/reference/html/mail.html <br>
